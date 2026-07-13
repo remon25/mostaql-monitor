@@ -18,7 +18,7 @@ export const CONFIG = {
 
     // أقصى عمر للمشروع بالدقائق (منذ نشره) حتى نعتبره "جديد بما يكفي"
     // بما أن القائمة مرتبة من الأحدث للأقدم، بمجرد الوصول لمشروع أقدم من هذا نتوقف عن الفحص فورًا
-    MAX_PROJECT_AGE_MINUTES: Number(process.env.MAX_PROJECT_AGE_MINUTES || 15),
+    MAX_PROJECT_AGE_MINUTES: Number(process.env.MAX_PROJECT_AGE_MINUTES || 300),
 
     // الحد الأدنى لمعدل توظيف صاحب المشروع (بالنسبة المئوية)
     MIN_EMPLOYMENT_RATE: Number(process.env.MIN_EMPLOYMENT_RATE || 30),
