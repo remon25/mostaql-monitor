@@ -1,0 +1,40 @@
+name: Mostaql Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {} # يسمح لك بتشغيله يدويًا من تبويب Actions للتجربة
+
+permissions:
+  contents: write # مطلوب حتى يقدر يحفظ data/seen.json و data/matches.json في الريبو
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run scraper once
+        env:
+          # مهم جدًا: نجعلها "once" هنا لأن GitHub Actions نفسه هو من يتكفل
+          # بتكرار التشغيل كل 5 دقائق (عبر cron أعلاه)، فلا داعي لتشغيل node-cron
+          # داخل السكربت نفسه، وإلا سيبقى يعمل بدون توقف داخل الحاوية المؤقتة.
+          RUN_MODE: once
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: npm start
+
+      - name: Save scraper state back to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/seen.json data/matches.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore: update scraper state [skip ci]"
+          git push
